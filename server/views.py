@@ -7,6 +7,7 @@ def login(request):
 
 @api_view(['POST'])
 def signup(request):
+    
     return Response({})
 
 @api_view(['GET'])
