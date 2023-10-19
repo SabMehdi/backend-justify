@@ -53,10 +53,12 @@ class JustifyTextView(APIView):
     def post(self, request, *args, **kwargs):
         # Retrieve the current user
         user = request.user
-        print(user.email)
+        print(user.id)
         # Check if the user has exceeded the daily quota
         word_count, created = WordCount.objects.get_or_create(user=user)
+        
         if word_count.count >= 80000:
+
             return Response({"detail": "Payment Required"}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         # Retrieve the plain text from the request body
