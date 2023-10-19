@@ -22,4 +22,9 @@ Authorization: token 9a644d20d212a03541d8378747d7f6f6c1197b02
 {
   
 }
-###
+
+### POST /api/justify
+POST http://127.0.0.1:8000/justify/
+Content-Type: text/plain
+Authorization: token 2c74f1ff8345545be2113fef92bc449dc4107de7
+

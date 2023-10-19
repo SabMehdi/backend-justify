@@ -27,14 +27,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Whitelist the origins that are allowed to access your Django API:
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your React frontend origin here
+    "http://localhost:3000",
+    "http://localhost:3001",
+    # Add your React frontend origin here
     # Add other origins if needed
 ]
 # Application definition
+
+CSRF_EXEMPT_URLS = ['/justify/']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -45,8 +49,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'server'
+
 ]
+CORS_ALLOW_CREDENTIALS = True
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,8 +64,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-     'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+
 ]
 
 ROOT_URLCONF = 'server.urls'
