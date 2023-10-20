@@ -53,7 +53,7 @@ class JustifyTextView(APIView):
     def post(self, request, *args, **kwargs):
         # Retrieve the current user
         user = request.user
-        print(user.id)
+        #print(user.id)
         # Check if the user has exceeded the daily quota
         word_count, created = WordCount.objects.get_or_create(user=user)
         
@@ -68,14 +68,31 @@ class JustifyTextView(APIView):
         justified_text = justify_text(text)  # Replace justify_function with your actual logic
 
         # Count the words in the justified text
-        word_count.count += len(justified_text.split())
+        word_count.count += len(justified_text)
         word_count.save()
 
         # Return the justified text
         return Response({"justified_text": justified_text})
 
 def justify_text(text):
-    return text
+    lines=""
+    line=""
+    #print("words: "+str(len(text.split())))
+    for word in text.split():
+        if(len(line)<=80):
+            if((len(line)+len(word))<=80):
+                line+=word
+                if(len(line)<80):
+                    line+=" "
+            else:
+                while(len(line)<80):
+                    line+=" "
+                lines+=line+"\\n"
+                line=word+" "
+                print("\ttazzzz")     
+       
+    lines+=line
+    return lines
 
 """ 
 @api_view(['POST'])
