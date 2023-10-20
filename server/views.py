@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 
+from django.core.exceptions import ObjectDoesNotExist
+
 
 from .serializers import UserSerializer
 from rest_framework import status
@@ -28,16 +30,21 @@ def login(request):
 
 @api_view(['POST'])
 def signup(request):
-    serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get(
-            username=request.data['username'])  # creation du user
-        user.set_password(request.data['password'])  # sauvegarde du pw cripté
-        user.save()
-        token = Token.objects.create(user=user)
-        return Response({"token": token.key, "email": serializer.data['email'], "username": serializer.data['username']})
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    email = request.data.get('email')  
+    try:
+        existing_user = User.objects.get(email=email)
+        return Response({"error": "email already exist"}, status=status.HTTP_400_BAD_REQUEST)
+    except ObjectDoesNotExist:
+   
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            user = User.objects.get(username=request.data['username']) 
+            user.set_password(request.data['password'])  
+            user.save()
+            token = Token.objects.create(user=user)
+            return Response({"token": token.key, "email": serializer.data['email'], "username": serializer.data['username']})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -51,27 +58,22 @@ class JustifyTextView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        # Retrieve the current user
         user = request.user
         #print(user.id)
-        # Check if the user has exceeded the daily quota
+
         word_count, created = WordCount.objects.get_or_create(user=user)
         
         if word_count.count >= 80000:
 
-            return Response({"detail": "Payment Required"}, status=status.HTTP_402_PAYMENT_REQUIRED)
+            return Response({"detail": "payment required"}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
-        # Retrieve the plain text from the request body
         text = request.body.decode('utf-8')
 
-        # Justify the text (your justification logic here)
-        justified_text = justify_text(text)  # Replace justify_function with your actual logic
-
-        # Count the words in the justified text
+        justified_text = justify_text(text) 
+        print(len(text))
         word_count.count += len(justified_text)
         word_count.save()
 
-        # Return the justified text
         return Response({"justified_text": justified_text})
 
 def justify_text(text):
@@ -88,35 +90,6 @@ def justify_text(text):
                 while(len(line)<80):
                     line+=" "
                 lines+=line+"\\n"
-                line=word+" "
-                print("\ttazzzz")     
-       
+                line=word+" "       
     lines+=line
     return lines
-
-""" 
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@csrf_exempt
-def justify_text(request):
-    # Retrieve the current user
-    user = request.user
-
-    # Check if the user has exceeded the daily quota
-    word_count, created = WordCount.objects.get_or_create(user=user)
-    if word_count.count >= 80000:
-        return Response({"detail": "Payment Required"}, status=status.HTTP_402_PAYMENT_REQUIRED)
-
-    # Retrieve the plain text from the request body
-    text = request.body.decode('utf-8')
-
-    # Justify the text (your justification logic here)
-    justified_text = justify_text(text)  # Replace justify_function with your actual logic
-
-    # Count the words in the justified text
-    word_count.count += len(justified_text.split())
-    word_count.save()
-
-    # Return the justified text
-    return Response({"justified_text": justified_text}) """
