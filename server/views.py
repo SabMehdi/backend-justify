@@ -62,19 +62,20 @@ class JustifyTextView(APIView):
         #print(user.id)
 
         word_count, created = WordCount.objects.get_or_create(user=user)
-        
-        if word_count.count >= 80000:
-
-            return Response({"detail": "payment required"}, status=status.HTTP_402_PAYMENT_REQUIRED)
-
         text = request.body.decode('utf-8')
         
         data = json.loads(text)
         text_value = data.get("text", "")
+        print(len(text_value.split()))
+        if word_count.count >= 80000 or  len(text_value.split())>=80000:
+
+            return Response({"detail": "payment required"}, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+       
 
         justified_text = justify_text(text) 
         #print('b'+justified_text+'b')
-        print(len(justified_text))
+        
         word_count.count += len(text_value.split())
         word_count.save()
 
