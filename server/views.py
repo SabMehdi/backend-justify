@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.core.exceptions import ObjectDoesNotExist
 
-
+import json
 from .serializers import UserSerializer
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -68,10 +68,14 @@ class JustifyTextView(APIView):
             return Response({"detail": "payment required"}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         text = request.body.decode('utf-8')
+        
+        data = json.loads(text)
+        text_value = data.get("text", "")
 
         justified_text = justify_text(text) 
-        print(len(text))
-        word_count.count += len(justified_text)
+        #print('b'+justified_text+'b')
+        print(len(justified_text))
+        word_count.count += len(text_value.split())
         word_count.save()
 
         return Response({"justified_text": justified_text})
